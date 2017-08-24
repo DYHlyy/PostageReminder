@@ -1,34 +1,21 @@
 package com.example.lyy.postagereminder;
 
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.yalantis.guillotine.animation.GuillotineAnimation;
+import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class InfoActivity extends AppCompatActivity implements View.OnClickListener {
+public class InfoActivity extends AppCompatActivity {
 
     private static final long RIPPLE_DURATION = 250;
-
-    private Toolbar toolbar;
-    private ImageView contentHamburger;
-    private FrameLayout root;
-
-    private TextView myInfo;
 
     private Postage[] postages = {
             new Postage("Ship1", R.drawable.ship1), new Postage("Ship2", R.drawable.ship2)
@@ -48,10 +35,8 @@ public class InfoActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
 
-        init();
-        init_guillotineMenu();
-
-        initPostages();
+        initToolBar();
+        initPostage();
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
@@ -64,12 +49,12 @@ public class InfoActivity extends AppCompatActivity implements View.OnClickListe
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshFruits();
+                refreshPostage();
             }
         });
     }
 
-    private void refreshFruits() {
+    private void refreshPostage() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -81,7 +66,7 @@ public class InfoActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        initPostages();
+                        initPostage();
                         adapter.notifyDataSetChanged();
                         swipeRefresh.setRefreshing(false);
                     }
@@ -90,7 +75,7 @@ public class InfoActivity extends AppCompatActivity implements View.OnClickListe
         }).start();
     }
 
-    private void initPostages() {
+    private void initPostage() {
         postageList.clear();
         for (int i = 0; i < 50; i++) {
             Random random = new Random();
@@ -99,37 +84,23 @@ public class InfoActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void init() {
-        root = (FrameLayout) findViewById(R.id.root);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        contentHamburger = (ImageView) findViewById(R.id.content_hamburger);
-
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setTitle(null);
+    private void initToolBar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
         }
-    }
-
-    private void init_guillotineMenu() {
-        //弹出的菜单
-        View guillotineMenu = LayoutInflater.from(this).inflate(R.layout.guillotine, null);
-        root.addView(guillotineMenu);
-
-        myInfo = (TextView) findViewById(R.id.myInfo);
-        myInfo.setOnClickListener(this);
-
-        // 添加弹出的菜单
-        new GuillotineAnimation.GuillotineBuilder(guillotineMenu, guillotineMenu.findViewById(R.id.guillotine_hamburger), contentHamburger)
-                .setStartDelay(RIPPLE_DURATION)
-                .setActionBarViewForAnimation(toolbar)
-                .build();
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.myInfo:
-                Toast.makeText(this, "S", Toast.LENGTH_SHORT).show();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
         }
+        return true;
     }
 }
